@@ -200,7 +200,7 @@ async def show_main_menu(message, user_first_name: str, user_id: int):
         await message.reply_text(admin_notif)
 
     keyboard = [
-        [KeyboardButton("🎮 Play Bole Bingo")],
+        [KeyboardButton("🎮 Play Betesb Bingo")],
         [KeyboardButton("📝 Register"), KeyboardButton("🌐 Check Balance")],
         [KeyboardButton("💳 Deposit"), KeyboardButton("💰 Withdraw")],
         [KeyboardButton("🔗 Invite & Earn"), KeyboardButton("📞 Contact Support")],
