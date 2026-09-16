@@ -1,3 +1,25 @@
+import os
+import threading
+from flask import Flask
+
+app = Flask(__name__)
+
+
+@app.route("/")
+def home():
+  return "Bot is running!"
+
+
+def run_web():
+  port = int(os.environ.get("PORT", 8080))
+  app.run(host="0.0.0.0", port=port)
+
+
+# Web server በ background እንዲሰራ ማድረግ
+threading.Thread(target=run_web, daemon=True).start()
+
+# ከዚህ በታች የእርስዎ የቦት ኮድ ይ ቀጥላል...
+
 import logging
 import json
 import os
