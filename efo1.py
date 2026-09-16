@@ -41,11 +41,11 @@ logging.basicConfig(
 # የቦቱ ቶክን፣ ዩዘርኔም እና የአድሚን ID
 TOKEN = "8699981749:AAHVNnQFzwY2RsTJHGcQe1hQlsIBYSwWWH4"
 BOT_USERNAME = "@betesebbingo2_bot"
-ADMIN_ID = 1124325056
+ADMIN_ID = 7396414604
 
 # የቻናል ሊንክ እና የቻናል ID (በቁጥር የሚጀምር ID ከሆኑ int በመጠቀም መፈተሽ አለበት)
-CHANNEL_URL = "https://t.me/All_Best_Games_Zone"
-CHANNEL_ID = -1002274889155 
+CHANNEL_URL = "https://t.me/Ethiogamesmart"
+CHANNEL_ID = -1002241790628 
 
 # ዳታዎችን በፋይል ለማስቀመጥ የሚረዱ የፋይል ስሞች
 DB_FILE = "bot_database.json"
