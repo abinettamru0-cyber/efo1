@@ -39,13 +39,33 @@ logging.basicConfig(
 )
 
 # የቦቱ ቶክን፣ ዩዘርኔም እና የአድሚን ID
-TOKEN = "8699981749:AAHVNnQFzwY2RsTJHGcQe1hQlsIBYSwWWH4"
-BOT_USERNAME = "@betesebbingo2_bot"
+TOKEN = "8687155442:AAGcIkKhiR6pwpjz-UFGHqYbzV5LBLNSVCU"
+BOT_USERNAME = "@Joybingo1_bot"
 ADMIN_ID = 7396414604
 
-# የቻናል ሊንክ እና የቻናል ID (በቁጥር የሚጀምር ID ከሆኑ int በመጠቀም መፈተሽ አለበት)
-CHANNEL_URL = "https://t.me/Ethiogamesmart"
-CHANNEL_ID = -1002241790628 
+# አዲሱ የፎልደር/ቻት ሊንክ (ተጠቃሚዎች ሁሉንም በአንድ ለመቀላቀል)
+FOLDER_URL = "https://t.me/addlist/Tv6Tsydb4PAwNTVk"
+
+# የዌብ አፕ ሊንክ
+WEB_APP_URL = "https://fregamesjoy.free.nf"
+
+# ማስገደድ የሚገባቸው የሁሉም ቻናሎች እና ግሩፖች IDs ዝርዝር
+REQUIRED_CHATS = [
+    -1002241790628,
+    -1002431307720,
+    -1002634528305,
+    -1002274889155,
+    -1003770435878,
+    -1001859861747,
+    -1002661524115,
+    -1004335795977,
+    -1003789081248,
+    -1002807001034,
+    -1004331817433,
+    -1004229778125,
+    -1003882543266,
+    -1002787579075   # ግሩፕ ID
+]
 
 # ዳታዎችን በፋይል ለማስቀመጥ የሚረዱ የፋይል ስሞች
 DB_FILE = "bot_database.json"
@@ -80,6 +100,17 @@ def save_data():
 # ዳታዎችን መጫን
 user_balances, user_referrals, all_users = load_data()
 
+# ሁሉንም ቻናሎች/ግሩፖች መቀላቀሉን ማረጋገጫ ፊንክሽን
+async def check_all_memberships(bot, user_id):
+    for chat_id in REQUIRED_CHATS:
+        try:
+            member = await bot.get_chat_member(chat_id=chat_id, user_id=user_id)
+            if member.status in ["left", "kicked"]:
+                return False
+        except Exception:
+            return False
+    return True
+
 # 1. /start ሲሉ የሚሰጠው ምላሽ
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
@@ -89,7 +120,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     all_users.add(user_id)
 
     if user_id not in user_balances:
-        user_balances[user_id] = 50.0
+        user_balances[user_id] = 30.0  # Main balance 30 ብር
         user_referrals[user_id] = 0
     
     save_data()
@@ -114,13 +145,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except ValueError:
             pass
 
-    # ቻናል መቀላቀሉን በ ID ማረጋገጥ
-    try:
-        member = await context.bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-        if member.status in ["left", "kicked"]:
-            await ask_to_join(update, user_first_name)
-            return
-    except Exception:
+    # ሁሉንም ቻናሎች/ግሩፖች መረጋገጡን ማየት
+    is_joined = await check_all_memberships(context.bot, user_id)
+    if not is_joined:
         await ask_to_join(update, user_first_name)
         return
 
@@ -134,12 +161,8 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     all_users.add(user_id)
 
-    try:
-        member = await context.bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-        if member.status in ["left", "kicked"]:
-            await ask_to_join(update, user_first_name)
-            return
-    except Exception:
+    is_joined = await check_all_memberships(context.bot, user_id)
+    if not is_joined:
         await ask_to_join(update, user_first_name)
         return
 
@@ -147,15 +170,15 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def ask_to_join(update: Update, user_first_name: str):
     join_keyboard = [
-        [InlineKeyboardButton("📢 Join Channel", url=CHANNEL_URL)],
+        [InlineKeyboardButton("📢 ሁሉንም በአንድ ለመቀላቀል (Join All)", url=FOLDER_URL)],
         [InlineKeyboardButton("✅ Complete Join (ቼክ አድርግ)", callback_data="check_join")]
     ]
     reply_markup = InlineKeyboardMarkup(join_keyboard)
 
     text = (
         f"👋 ሰላም {user_first_name}!\n\n"
-        f"ቦቱን ለመጠቀም መጀመሪያ ከታች ያለውን ቻናል መቀላቀል (Join ማድረግ) አለብዎት።\n"
-        f"ቻናሉን ከተቀላቀሉ በኋላ **'Complete Join'** የሚለውን ይጫኑ!"
+        f"ቦቱን ለመጠቀም መጀመሪያ ከታች ያለውን ሊንክ በመጠቀም **ሁሉንም ቻናሎች እና ግሩፕ** መቀላቀል (Join ማድረግ) አለብዎት።\n\n"
+        f" ከተቀላቀሉ በኋላ **'Complete Join'** የሚለውን ይጫኑ!"
     )
     
     if update.callback_query:
@@ -171,16 +194,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = query.from_user.id
         user_first_name = query.from_user.first_name
 
-        try:
-            member = await context.bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-            if member.status in ["left", "kicked"]:
-                await query.answer("⚠️ እባክዎ መጀመሪያ ቻናሉን Join ያድርጉ!", show_alert=True)
-                return
-        except Exception:
-            await query.answer("⚠️ እባክዎ መጀመሪያ ቻናሉን Join ያድርጉ!", show_alert=True)
+        is_joined = await check_all_memberships(context.bot, user_id)
+        if not is_joined:
+            await query.answer("⚠️ እባክዎ መጀመሪያ ሁሉንም ቻናሎች እና ግሩፕ Join ያድርጉ!", show_alert=True)
             return
 
-        # ቻናሉን ገብቷል -> ወደ ቀጣዩ ደረጃ (ሜኑ) እናልፋለን
+        # ሁሉንም ገብቷል -> ወደ ቀጣዩ ደረጃ (ሜኑ) እናልፋለን
         await query.answer()
         try:
             await query.message.delete()
@@ -200,7 +219,7 @@ async def show_main_menu(message, user_first_name: str, user_id: int):
         await message.reply_text(admin_notif)
 
     keyboard = [
-        [KeyboardButton("🎮 Play Betesb Bingo")],
+        [KeyboardButton("🎮 Play Joy Bingo")],
         [KeyboardButton("📝 Register"), KeyboardButton("🌐 Check Balance")],
         [KeyboardButton("💳 Deposit"), KeyboardButton("💰 Withdraw")],
         [KeyboardButton("🔗 Invite & Earn"), KeyboardButton("📞 Contact Support")],
@@ -210,13 +229,13 @@ async def show_main_menu(message, user_first_name: str, user_id: int):
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     inline_keyboard = [
-        [InlineKeyboardButton("🎮 Play Beteseb Bingo", web_app=WebAppInfo(url="https://grandbingo.free.nf"))]
+        [InlineKeyboardButton("🎮 Play Joy Bingo", web_app=WebAppInfo(url=WEB_APP_URL))]
     ]
     inline_markup = InlineKeyboardMarkup(inline_keyboard)
 
     welcome_message = (
-        f"✅ ቻናሉን በተሳካ ሁኔታ ተቀላቀለዋል!\n"
-        f"👋 Welcome {user_first_name} to Beteseb Bingo! Choose an Option below.\n\n"
+        f"✅ ቻናሎቹን እና ግሩፑን በተሳካ ሁኔታ ተቀላቀለዋል!\n"
+        f"👋 Welcome {user_first_name} to Joy Bingo! Choose an Option below.\n\n"
         "🔗 ሰዎችን በመጋበዝ በሰው ቁጥር 10 ብር ይሸለሙ!\n"
         "🎮 ጨዋታውን በቀጥታ ቦቱ ውስጥ ለመክፈት ከታች ያለውን ቁልፍ ይጫኑ:"
     )
@@ -232,7 +251,7 @@ async def check_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if not context.args:
-        await update.message.reply_text("⚠️ አጠቃቀም: `/check <user_id>`", parse_mode="Markdown")
+        await update.message.reply_text("⚠️ አጠቃቀም: `/checklist <user_id>`", parse_mode="Markdown")
         return
 
     try:
@@ -302,12 +321,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = user.id
     user_first_name = user.first_name
     
-    try:
-        member = await context.bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-        if member.status in ["left", "kicked"]:
-            await ask_to_join(update, user_first_name)
-            return
-    except Exception:
+    is_joined = await check_all_memberships(context.bot, user_id)
+    if not is_joined:
         await ask_to_join(update, user_first_name)
         return
 
@@ -320,7 +335,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     save_data()
 
-    if text == "🎮 Play Beteseb Bingo ":
+    if text == "🎮 Play Joy Bingo":
         await update.message.reply_text("👇 እባክዎ ከላይ የተላከውን የጨዋታ አዝራር ይጠቀሙ።")
     elif text == "📝 Register":
         await update.message.reply_text("📝 ለመመዝገብ እባክዎ ስልክ ቁጥርዎን ከታች ባለው አዝራር ያጋሩ።")
@@ -329,7 +344,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         referrals = user_referrals[user_id]
         await update.message.reply_text(f"💰 ቀሪ ሂሳብ: **{balance:.2f} ብር**\n👥 የጋበዟቸው: **{referrals} ሰው**")
     elif text == "🔗 Invite & Earn":
-        referral_link = f"https://t.me/{BOT_USERNAME}?start=ref_{user_id}"
+        referral_link = f"https://t.me/{BOT_USERNAME[1:]}?start=ref_{user_id}"
         await update.message.reply_text(f"🔗 **ሊንክዎ:**\n`{referral_link}`\n\nእያንዳንዱ ሰው ሲመጣ 10 ብር ያግኙ!")
     elif text == "💳 Deposit":
         await update.message.reply_text("💳 ገንዘብ ለማስገባት መመሪያዎችን ይከተሉ።")
@@ -345,7 +360,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("እባክዎ ከታች ያሉትን አማራጮች ይጠቀሙ።")
 
 def main():
-    application = ApplicationBuilder().token(TOKEN).build()
+    application = (
+        ApplicationBuilder()
+        .token(TOKEN)
+        .connect_timeout(30.0)
+        .read_timeout(30.0)
+        .write_timeout(30.0)
+        .pool_timeout(30.0)
+        .build()
+    )
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("menu", menu_command))
@@ -358,7 +381,7 @@ def main():
     application.add_handler(MessageHandler(filters.CONTACT, contact_handler))
     application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-    print("EFO Bingo በቻናል ID እና ትክክለኛ ቼክ በመሥራት ላይ ነው...")
+    print("Joy Bingo በአዲሱ ጆይን ሊንክ በመሥራት ላይ ነው...")
     application.run_polling()
 
 if __name__ == "__main__":
